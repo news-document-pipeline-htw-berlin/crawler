@@ -38,7 +38,7 @@ For execution you need to save the database authentification data in your `~/.pr
 
 ```
 export MONGO_USER="s0..."
-export MONGO_HOST="host:port
+export MONGO_HOST="host:port"
 export MONGO_DATABASE="s0..."
 export MONGO_PWD="password" 
 ``` 
@@ -51,6 +51,14 @@ You also need access to the database (directly or via VPN)
 
 More settings are available in `settings.py`, for example setting the mongoDB collection names.
 
+
+#### Postillon Spider
+- Install selenium
+    ```
+    pip3 install selenium
+    ```
+- Install geckodriver
+    ``` sudo apt install firefox-geckodriver
 
 ### Test run
 
