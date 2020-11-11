@@ -34,6 +34,9 @@ AUTH_MECHANISM = 'SCRAM-SHA-1'
 MONGO_URI = 'mongodb://' + MONGO_USER + ':' + MONGO_PWD + '@' + MONGO_HOST \
             + '/?authSource=' + MONGO_DATABASE + '&authMechanism=' + AUTH_MECHANISM
 
+#only for debugging!
+#MONGO_URI = 'mongodb://' + MONGO_HOST + '/?authSource=' + MONGO_DATABASE
+
 ARTICLE_COLLECTION_NAME = 'scraped_articles'
 LOG_COLLECTION_NAME = 'log_crawler'
 
