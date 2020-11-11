@@ -10,8 +10,8 @@ root = 'https://sueddeutsche.de'
 short_url_regex = "\d(\.|\d)+$" # helps converting long to short url: https://sueddeutsche.de/1.3456789
 full_article_addition = '-0'    # if article extends over multiple pages this url addition will get the full article
 
-testrun_cats = 0                # limits the categories to crawl to this number. if zero, no limit.
-testrun_arts = 0                # limits the article links to crawl per category page to this number. if zero, no limit.
+testrun_cats = 5                # limits the categories to crawl to this number. if zero, no limit.
+testrun_arts = 5                # limits the article links to crawl per category page to this number. if zero, no limit.
 
 limit_pages = 10                 # additional category pages of 50 articles each. Maximum of 400 pages
                                 # => 1. building the archive: 400
@@ -79,7 +79,8 @@ class SueddeutscheSpider(scrapy.Spider):
     
 
 
-    
+    #TODO
+    '''
         # request additional category pages
         offSet = 0
         more = "https://www.sueddeutsche.de/overviewpage/additionalDepartmentTeasers?departmentId={}&offset={}&size=50&isMobile=false".format(
@@ -90,12 +91,28 @@ class SueddeutscheSpider(scrapy.Spider):
             offSet = offSet + 25
             more = "https://www.sueddeutsche.de/overviewpage/additionalDepartmentTeasers?departmentId={}&offset={}&size=50&isMobile=false".format(
                 departmentIds[department], offSet)
-    
+    '''
 
     def parse_article(self, response, description, short_url, long_url, dep):
         utils_obj = utils()
 
         # Intro: bullet points or continuous text
+        '''
+        def get_intro():
+            article_intro = response.css(".css-korpch")
+            paragraphs = article_intro.css('div p::text').extract() + article_intro.css('div p b::text').extract()
+            list_items = article_intro.css('div ul li::text').extract()
+
+            intro = "\n".join(paragraphs + list_items)
+
+            if not intro:
+                utils.log_event(utils_obj, self.name_short, short_url, 'intro', 'warning')
+                logging.warning("Cannot parse intro: %s", short_url)
+                intro = ""
+
+            return intro
+            '''
+
 
         def get_intro():
             article_intro = response.css(".css-korpch")
@@ -122,6 +139,22 @@ class SueddeutscheSpider(scrapy.Spider):
                 logging.warning("Cannot parse article text: %s", short_url)
 
             return text
+
+
+        # Article text: paragraphs and subheadings
+        '''
+        def get_article_text():
+            article_wrapper = response.xpath('//*[@itemprop="articleBody"]')
+            article_parts = article_wrapper.css('.css-0::text, h3::text, .css-0 b::text').extract()
+
+            text = "\n".join(article_parts)
+
+            if not text:
+                utils.log_event(utils_obj, self.name_short, short_url, 'text', 'warning')
+                logging.warning("Cannot parse article text: %s", short_url)
+
+            return text
+            '''
 
 
         def get_pub_time():

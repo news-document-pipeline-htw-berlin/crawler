@@ -7,9 +7,8 @@ from ..utils import utils
 import logging
 import re
 
-
-max_articles_per_month = 10     #articles to crawl per month
-number_of_months = 1            #number of past months to crawl articles for
+max_articles_per_month = 10
+number_of_months = 1
 
 class PostsSpider(Spider):
     name = 'golem'

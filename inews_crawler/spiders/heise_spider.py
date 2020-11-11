@@ -9,8 +9,8 @@ root = 'https://www.heise.de'
 short_url_regex="\-[0-9]\d{6,}"       # helps converting long to short url: https://www.heise.de/-4642199
 full_article_addition = '?seite=all'  # if article extends over multiple pages this url addition will get the full article
 
-testrun_cats = 0    # limits the categories to crawl to this number. if zero, no limit.
-testrun_arts = 0    # limits the article links to crawl per category page to this number. if zero, no limit.
+testrun_cats = 10    # limits the categories to crawl to this number. if zero, no limit.
+testrun_arts = 10    # limits the article links to crawl per category page to this number. if zero, no limit.
 
 limit_pages = 0     # => 1. building the archive: 0
                     # => 2. daily use: 3 or 4
