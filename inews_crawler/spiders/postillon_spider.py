@@ -13,15 +13,16 @@ import re
 
 root = 'https://www.der-postillon.com/p/das-postillon-archiv.html'
 
-# limits the categories to crawl to this number. if zero, no limit.
-testrun_cats = 0
-# limits the number of closed year- and month-archive-entities to open (and reveal contained months/articles)
-testrun_years_and_months = 1
-# limits the article links to crawl to this number. if zero, no limit.
-testrun_articles = 1
-# For deployment: don't forget to set the testrun variables to zero
-# 'https://www.der-postillon.com/2020/11/sonntagsfrage-nerze.html'  # Only scrape the specified article
-testrun_article_url = 'https://www.der-postillon.com/2020/11/agent-smith.html'
+# For deployment: don't forget to set the testrun variables to 0
+# limits number of articles. If 0, no limit.
+testrun_articles = 0
+# Only scrape the specified article. Full URL required or False/0 to disable this limit
+# 'https://www.der-postillon.com/2020/11/agent-smith.html'
+testrun_article_url = False
+
+year_to_crawl = 2020  # If False or 0, crawl all years
+# limits to crawl only articles of the year beginning with the specified month (newer or equal). If False or 0, crawl entire year. Requires year_to_crawl to not be False
+limit_min_month_of_year_to_crawl = 0
 
 
 class PostillonSpider(scrapy.Spider):
@@ -44,40 +45,66 @@ class PostillonSpider(scrapy.Spider):
                 desired_capabilities=desired_capabilities)
             return driver
 
+        def get_closed_elements():
+            # Get all closed months of year to crawl, that are newer or equal to the limit specified by limit_min_month_of_year_to_crawl
+            if limit_min_month_of_year_to_crawl:
+                # get year
+                closed_months_of_year_to_crawl = driver.find_element_by_class_name(
+                    'year-' + str(year_to_crawl))
+
+                # Get closed months
+                xpath = ".//li[contains(@class, 'closed') and (contains(@class, 'month-12')"
+                for month in range(limit_min_month_of_year_to_crawl, 12):
+                    xpath += " or contains(@class, 'month-" + \
+                        f'{month+1:02d}' + "')"
+                xpath = xpath + ")]"
+
+                closed_elements = closed_months_of_year_to_crawl.find_elements_by_xpath(
+                    xpath)
+
+            # Get all closed months of year to crawl
+            elif year_to_crawl:
+                closed_elements = driver.find_element_by_class_name(
+                    'year-' + str(year_to_crawl)).find_elements_by_class_name('closed')
+
+            # Get all closed years/months of the entire archive
+            else:
+                # also finds closed months inside closed years
+                closed_elements = driver.find_elements_by_class_name('closed')
+
+            print(len(closed_elements))
+            return closed_elements
+
+        def click_elements(elements):
+            for element in elements:
+                try:
+                    # element.click() causes Exception: "could not be scrolled into view"
+                    driver.execute_script("arguments[0].click();", element)
+                    print("click")
+                except Exception as e:
+                    print(e)
+
         driver = init_selenium_driver()
-
         driver.get(root)
-        # also finds closed months inside closed years
-        elements = driver.find_elements_by_class_name('closed')
 
-        elements = elements[:testrun_years_and_months]  # crawl limit
-        for element in elements:
-            try:
-                # element.click() causes Exception: "could not be scrolled into view"
-                driver.execute_script("arguments[0].click();", element)
-            except Exception as e:
-                print(e)
+        # Open closed years/months to load articles
+        click_elements(get_closed_elements())
 
         # Hand-off between Selenium and Scrapy
         sel = Selector(text=driver.page_source)
-        # linklist = sel.xpath('//ul[@class="month-inner"]//li/a/@href').extract()
+
         articleList = sel.xpath('//ul[@class="month-inner"]//li/a')
 
-        # TODO apply crawl limit also for Selenium link crawling
         articleList = utils.limit_crawl(articleList, testrun_articles)
 
         if articleList:
             for article in articleList:
                 long_url = article.xpath('./@href').extract()[0]
-                # TODO: check if list is empty
-                # long_url = article.xpath('./@href').extract()
-                # long_url = long_url[0] if long_url != [] else ''
                 published_time = article.xpath(
                     './/div[@class="date"]/text()').extract()
                 published_time = published_time[0] if len(
                     published_time) > 0 else ''
 
-                # print(long_url)
                 # if short_url and not utils.is_url_in_db(short_url):  # db-query
                 # if not utils.is_url_in_db(long_url):  # db-query TODO: use, when db properly connected
                 if True:
