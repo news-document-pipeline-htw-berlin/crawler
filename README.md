@@ -51,6 +51,35 @@ You also need access to the database (directly or via VPN)
 
 More settings are available in `settings.py`, for example setting the mongoDB collection names.
 
+### Local Setup
+- Install mongodb
+- Run mongo daemon: `mongod`
+    - Run with custom db path: `mongod --dbpath=./data-mongodb`
+- Open mongo shell: `mongo`
+- Create database: `use scraped_articles`
+- Create user: `db.createUser({user:"username",pwd:"password",roles:["readWrite", "dbAdmin"]})`
+- Update environment variables in `~/.profile`:
+    ```
+    export MONGO_USER="username"
+    export MONGO_HOST="localhost:27017"
+    export MONGO_DATABASE="scraped_articles"
+    export MONGO_PWD="password" 
+    ```
+- Connect via mongo-shell: `mongo`
+    - `mongo -u <USER> -p <PASSWORD> <HOST>:<PORT>/<DB>`
+- Create collections `scraped_articles` and `log_crawler`
+    - TODO: 
+        ```
+        mongos> use s0563168
+        switched to db s0563168
+        mongos> db.createCollection("scraped_articles")
+        {
+                "code" : 6,
+                "ok" : 0,
+                "errmsg" : "Database s0563168 not found due to No route to host"
+        }
+        ```
+        - Auch nicht über ssh erfolgreich: `ssh s0...@hadoop05.f4.htw-berlin.de`
 
 #### Postillon Spider
 - Install selenium
