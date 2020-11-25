@@ -53,7 +53,6 @@ class HeiseSpider(scrapy.Spider):
 
         if page<limit_pages:
             dep_page = department_url + "seite-" + str(page + 1) + "/"
-            print(dep_page)
             yield scrapy.Request(dep_page,
                                  callback=self.parse_category,
                                  cb_kwargs=dict(department_url=department_url, page=page + 1,
