@@ -79,8 +79,6 @@ class SueddeutscheSpider(scrapy.Spider):
     
 
 
-
-    #TODO
     
         # request additional category pages
         offSet = 0
@@ -98,22 +96,6 @@ class SueddeutscheSpider(scrapy.Spider):
         utils_obj = utils()
 
         # Intro: bullet points or continuous text
-        '''
-        def get_intro():
-            article_Intro = response.css(".sz-article-intro__wysiwyg ul li::text").extract()
-            if article_Intro:
-                intro = ""
-                for int in article_Intro:
-                    intro = intro + int
-            else:
-                intro = response.css(".sz-article-intro__abstract-text::text").get()
-            if not intro:
-                utils.log_event(utils_obj, self.name_short, short_url, 'intro', 'warning')
-                logging.warning("Cannot parse intro: %s", short_url)
-                intro = ""
-            return intro
-            '''
-
 
         def get_intro():
             article_intro = response.css(".css-korpch")
@@ -141,30 +123,6 @@ class SueddeutscheSpider(scrapy.Spider):
 
             return text
 
-
-        # Article text: paragraphs and subheadings
-        '''
-        def get_article_text():
-            article_paragraphs = []
-            html_article = response.xpath('//div[@class="sz-article__body sz-article-body"]')
-            article_tags = html_article.xpath('p|h3').extract()
-            for tag in article_tags:
-                line = ""
-                tag_selector = Selector(text=tag)
-                html_line = tag_selector.xpath('//*/text()').extract()
-                for text in html_line:
-                    line += text
-                article_paragraphs.append(line)
-            article_text = ""
-            for paragraph in article_paragraphs:
-                if paragraph:
-                    article_text += paragraph + "\n\n"
-            text = article_text.strip()
-            if not text:
-                utils.log_event(utils_obj, self.name_short, short_url, 'text', 'warning')
-                logging.warning("Cannot parse article text: %s", short_url)
-            return text
-            '''
 
         def get_pub_time():
             time_str = response.xpath('//time/@datetime').get()
