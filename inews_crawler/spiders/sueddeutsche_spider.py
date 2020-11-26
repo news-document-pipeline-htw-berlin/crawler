@@ -10,10 +10,10 @@ root = 'https://sueddeutsche.de'
 short_url_regex = "\d(\.|\d)+$" # helps converting long to short url: https://sueddeutsche.de/1.3456789
 full_article_addition = '-0'    # if article extends over multiple pages this url addition will get the full article
 
-testrun_cats = 5                # limits the categories to crawl to this number. if zero, no limit.
-testrun_arts = 5                # limits the article links to crawl per category page to this number. if zero, no limit.
+testrun_cats = 0                # limits the categories to crawl to this number. if zero, no limit.
+testrun_arts = 0                # limits the article links to crawl per category page to this number. if zero, no limit.
 
-limit_pages = 1                 # additional category pages of 50 articles each. Maximum of 400 pages
+limit_pages = 10                 # additional category pages of 50 articles each. Maximum of 400 pages
                                 # => 1. building the archive: 400
                                 # => 2. daily use: 0 or 1
                                 # don't forget to set the testrun variables to zero
@@ -52,7 +52,9 @@ class SueddeutscheSpider(scrapy.Spider):
             "digital": "sz.2.233",
             "karriere": "sz.2.234",
             "reise": "sz.2.241",
-            "auto": "sz.2.232"
+            "auto": "sz.2.232",
+            "medien": "sz.2.221",
+            "geld": "sz.2.229"
         }
 
         utils_obj = utils()
@@ -74,9 +76,12 @@ class SueddeutscheSpider(scrapy.Spider):
             else:
                 utils.log_event(utils_obj, self.name_short, short_url, 'exists', 'info')
                 logging.info("%s already in db", short_url)
+    
+
+
 
     #TODO
-    '''
+    
         # request additional category pages
         offSet = 0
         more = "https://www.sueddeutsche.de/overviewpage/additionalDepartmentTeasers?departmentId={}&offset={}&size=50&isMobile=false".format(
@@ -87,7 +92,7 @@ class SueddeutscheSpider(scrapy.Spider):
             offSet = offSet + 25
             more = "https://www.sueddeutsche.de/overviewpage/additionalDepartmentTeasers?departmentId={}&offset={}&size=50&isMobile=false".format(
                 departmentIds[department], offSet)
-    '''
+    
 
     def parse_article(self, response, description, short_url, long_url, dep):
         utils_obj = utils()
