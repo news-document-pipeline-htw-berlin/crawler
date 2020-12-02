@@ -15,14 +15,14 @@ root = 'https://www.der-postillon.com/p/das-postillon-archiv.html'
 
 # For deployment: don't forget to set the testrun variables to 0
 # limits number of articles. If 0, no limit.
-testrun_articles = 0
+testrun_articles = 10
 # Only scrape the specified article. Full URL required or False/0 to disable this limit
 # 'https://www.der-postillon.com/2020/11/agent-smith.html'
 testrun_article_url = False
 
 year_to_crawl = 2020  # If False or 0, crawl all years
 # limits to crawl only articles of the year beginning with the specified month (newer or equal). If False or 0, crawl entire year. Requires year_to_crawl to not be False
-limit_min_month_of_year_to_crawl = 0
+limit_min_month_of_year_to_crawl = 9
 
 
 class PostillonSpider(scrapy.Spider):
@@ -105,18 +105,11 @@ class PostillonSpider(scrapy.Spider):
                 published_time = published_time[0] if len(
                     published_time) > 0 else ''
 
-                # if short_url and not utils.is_url_in_db(short_url):  # db-query
-                # if not utils.is_url_in_db(long_url):  # db-query TODO: use, when db properly connected
-                if True:
-                    print("url not in db")
-                    # yield scrapy.Request(short_url+"/", callback=self.parse_article,
-                    #                      cb_kwargs=dict(short_url=short_url, long_url=long_url))
+                if long_url and not utils.is_url_in_db(long_url):
                     yield scrapy.Request(long_url, callback=self.parse_article,  cb_kwargs=dict(long_url=long_url, published_time=published_time))
 
                 else:
                     print("url in db")
-                    # utils.log_event(utils(), self.name, short_url, 'exists', 'info')
-                    # logging.info('%s already in db', short_url)
                     utils.log_event(utils(), self.name,
                                     long_url, 'exists', 'info')
                     logging.info('%s already in db', long_url)
@@ -126,17 +119,19 @@ class PostillonSpider(scrapy.Spider):
 
     def parse_article(self, response, long_url, published_time):
         utils_obj = utils()
-        print("parsing article")
+        print("parsing article" + long_url)
 
         def get_article_text():
             article_paragraphs = []
-            tags = response.xpath('//div[@class="post hentry"]//p|a').extract()
+            tags = response.xpath(
+                '//div[@class="post hentry"]//p|a|b').extract()
+
             for tag in tags:
                 line = ""
                 tag_selector = Selector(text=tag)
-                html_line = tag_selector.xpath('//*/text()').extract()
-                for text in html_line:
-                    line += text
+                text_list = tag_selector.xpath('//*/text()').extract()
+                for text_part in text_list:
+                    line += text_part
                 article_paragraphs.append(line)
 
             article_text = ""
@@ -144,10 +139,33 @@ class PostillonSpider(scrapy.Spider):
                 if paragraph:
                     article_text += paragraph + "\n\n"
             text = article_text.strip()
+
             if not text:
-                utils.log_event(utils_obj, self.name,
-                                long_url, 'text', 'warning')
-                logging.warning("Cannot parse article text: %s", long_url)
+                # Alternative article layout. Examples https://www.der-postillon.com/2019/11/deutsche-bahn-hack.html , 'https://www.der-postillon.com/2020/02/fehler-stabhochsprung.html'
+                text_list = response.xpath(
+                    '//div[@itemprop="articleBody"]//text()').extract()
+
+                # slicing off after length computation
+                # Slice off everything after "Lesen Sie auch:"
+                begin_slice = '\nLesen Sie auch: '
+                text_list = text_list[:text_list.index(begin_slice)]
+
+                # Slice off credits
+                len_text_list = len(text_list)
+                for i in range(1, 4):
+                    if any(substring in text_list[len_text_list-i] for substring in ['ssi', 'dan', 'pfg', 'fed', 'Foto', '\n']):
+                        text_list = text_list[:len_text_list-i]
+
+                # Combine text_list
+                for text_part in text_list:
+                    text += text_part
+                text = text.strip()
+
+                # Could not parse text
+                if not text:
+                    utils.log_event(utils_obj, self.name,
+                                    long_url, 'text', 'warning')
+                    logging.warning("Cannot parse article text: %s", long_url)
             return text
 
         def get_pub_time():
@@ -179,6 +197,10 @@ class PostillonSpider(scrapy.Spider):
                 for str in keywords_with_junk]
             return keywords
 
+        # TODO
+        def get_authors():
+            return ['Alexander Bayer', 'Dan Eckert']
+
         item = ArticleItem()
 
         item['crawl_time'] = datetime.now()
@@ -187,7 +209,7 @@ class PostillonSpider(scrapy.Spider):
         item['news_site'] = "postillon"
         item['title'] = utils.get_item_string(utils_obj, response, 'title', long_url, 'xpath',
                                               ['//meta[@property="og:title"]/@content'], self.name)
-        item['authors'] = "Der Postillon"
+        item['authors'] = get_authors()  # ["Der Postillon"]
         #    ['//meta[@name="author"]/@content'], self.name)
         item['description'] = utils.get_item_string(utils_obj, response, 'description', long_url, 'xpath',
                                                     ['//meta[@name="description"]/@content'], self.name)
