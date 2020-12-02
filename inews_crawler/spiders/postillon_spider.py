@@ -4,6 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 import logging
 from datetime import datetime
 from ..items import ArticleItem
@@ -20,9 +21,11 @@ testrun_articles = False
 # 'https://www.der-postillon.com/2020/11/agent-smith.html'
 testrun_article_url = False
 
-year_to_crawl = 2020  # If False or 0, crawl all years
+year_to_crawl = False  # If False or 0, crawl all years
 # limits to crawl only articles of the year beginning with the specified month (newer or equal). If False or 0, crawl entire year. Requires year_to_crawl to not be False
 limit_min_month_of_year_to_crawl = False
+
+CURRENT_YEAR = 2020
 
 
 class PostillonSpider(scrapy.Spider):
@@ -62,6 +65,8 @@ class PostillonSpider(scrapy.Spider):
             desired_capabilities = firefoxOptions.to_capabilities()
             driver = webdriver.Firefox(
                 desired_capabilities=desired_capabilities)
+
+            #
             return driver
 
         def get_closed_elements():
@@ -75,31 +80,71 @@ class PostillonSpider(scrapy.Spider):
             # Get all closed months of year to crawl, that are newer or equal to the limit specified by limit_min_month_of_year_to_crawl
             if limit_min_month_of_year_to_crawl:
                 # get year
-                closed_months_of_year_to_crawl = driver.find_element_by_class_name(
+                element_of_year_to_crawl = driver.find_element_by_class_name(
                     'year-' + str(year_to_crawl))
 
                 # Get closed months
                 xpath = ".//li[contains(@class, 'closed') and (contains(@class, 'month-12')"
-                for month in range(limit_min_month_of_year_to_crawl, 12):
+                for month in range(limit_min_month_of_year_to_crawl-1, 12):
                     xpath += " or contains(@class, 'month-" + \
                         f'{month+1:02d}' + "')"
                 xpath = xpath + ")]"
 
-                closed_elements = closed_months_of_year_to_crawl.find_elements_by_xpath(
+                closed_elements = element_of_year_to_crawl.find_elements_by_xpath(
                     xpath)
+                closed_elements.append(element_of_year_to_crawl)
 
             # Get all closed months of year to crawl
             elif year_to_crawl:
-                closed_elements = driver.find_element_by_class_name(
-                    'year-' + str(year_to_crawl)).find_elements_by_class_name('closed')
+                element_of_year_to_crawl = driver.find_element_by_class_name(
+                    'year-' + str(year_to_crawl))
+
+                closed_elements = element_of_year_to_crawl.find_elements_by_class_name(
+                    'closed')
+                closed_elements.append(element_of_year_to_crawl)
 
             # Get all closed years/months of the entire archive
             else:
                 # also finds closed months inside closed years
                 closed_elements = driver.find_elements_by_class_name('closed')
 
-            print(len(closed_elements))
             return closed_elements
+
+        def waitForLoad():
+            """
+            Wait until at 1 article per year has been loaded. 
+            If the current year is being crawled wait until an article of january or limit_min_month_of_year_to_crawl 
+            has been loaded (Because the current month of the current year is already loaded on page load).
+
+            """
+            TIMEOUT = 10
+            wait = WebDriverWait(driver, TIMEOUT)
+            try:
+                xpath = "//a/div/div/div[contains(@class, 'date') and contains(string(), '."
+                if year_to_crawl:
+                    # If the current year is crawled wait for an article of the first month to be loaded. 
+                    # This is necessary because the current month is already loaded on page load.
+                    if year_to_crawl == CURRENT_YEAR:
+                        if limit_min_month_of_year_to_crawl:
+                            xpath += str(limit_min_month_of_year_to_crawl) + "."
+                        else:
+                            xpath += str(1) + "."
+
+                    xpath += str(year_to_crawl) + "')]"
+                    wait.until(EC.presence_of_element_located(
+                        (By.XPATH, xpath)))
+
+                # Wait for 1 artile per year
+                else:
+                    base_xpath = xpath
+                    for i in range(2008, CURRENT_YEAR+1):
+                        xpath = base_xpath + str(i) + "')]"
+                        wait.until(EC.presence_of_element_located(
+                            (By.XPATH, xpath)))
+
+            except TimeoutException as e:
+                logging.warning(
+                    "TimeoutException has been thrown while waiting for articles to load: %s", e)
 
         def click_elements(elements):
             """"
@@ -114,15 +159,24 @@ class PostillonSpider(scrapy.Spider):
                 try:
                     # element.click() causes Exception: "could not be scrolled into view"
                     driver.execute_script("arguments[0].click();", element)
-                    print("click")
+                    print("click: " +
+                          element.get_attribute('class').split()[1])
+
                 except Exception as e:
-                    print(e)
+                    logging.warning(
+                        "An exception has been thrown while clicking closed years/months: %s", e)
 
         driver = init_selenium_driver()
         driver.get(root)
 
+        # Close all years/months
+        click_elements(driver.find_elements_by_class_name('open'))
+
         # Open closed years/months to load articles
         click_elements(get_closed_elements())
+
+        # Wait for articles to be loaded
+        waitForLoad()
 
         # Hand-off between Selenium and Scrapy
         sel = Selector(text=driver.page_source)
@@ -204,7 +258,8 @@ class PostillonSpider(scrapy.Spider):
                 # slicing off after length computation
                 # Slice off everything after "Lesen Sie auch:"
                 begin_slice = '\nLesen Sie auch: '
-                text_list = text_list[:text_list.index(begin_slice)]
+                if begin_slice in text_list:
+                    text_list = text_list[:text_list.index(begin_slice)]
 
                 # Slice off credits
                 len_text_list = len(text_list)
