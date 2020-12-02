@@ -119,7 +119,7 @@ class PostillonSpider(scrapy.Spider):
 
     def parse_article(self, response, long_url, published_time):
         utils_obj = utils()
-        print("parsing article" + long_url)
+        print("parsing article: " + long_url)
 
         def get_article_text():
             article_paragraphs = []
@@ -197,9 +197,40 @@ class PostillonSpider(scrapy.Spider):
                 for str in keywords_with_junk]
             return keywords
 
-        # TODO
         def get_authors():
-            return ['Alexander Bayer', 'Dan Eckert']
+            authors = []
+            author_dict = {
+                "ssi" : "Stefan Sichermann",
+                "dan" : "Dan Eckert",
+                "pfg" : "Peer Gahmert und Phillip Feldhusen",
+                "fed" : "Alexander Bayer",
+                "tla" : "Tobias Lauterbach",
+                "swo" : "Sebastian Wolking",
+                "bep" : "Bernhard Pöschla",
+                "jki" : "Julia Kiesselbach",
+                "adg" : "Daniel Al-Kabbani",
+                "up"  : "Die UpTicker-Redaktion",
+                "mate": "Mate Tabula",
+                "lor" : "Laura Orlik",
+                "vwi" : "Valentin Witt",
+                "coe" : "Cornelius Oettle",
+                "sha" : "Simon Hauschild",
+                "shp" : "Selim Han Polat",
+                "ejo" : "Ernst Jordan"
+            }
+
+            potential_credit_strings = response.xpath(
+                '//div[@itemprop="articleBody"]//span/text()').extract()
+
+            for potential_credit_string in potential_credit_strings:
+                for author_key in list(author_dict.keys()):
+                    if author_key in potential_credit_string:
+                        authors.append(author_dict[author_key])
+
+            if len(authors) == 0:
+                authors.append("Der Postillon")
+
+            return authors
 
         item = ArticleItem()
 
@@ -209,8 +240,7 @@ class PostillonSpider(scrapy.Spider):
         item['news_site'] = "postillon"
         item['title'] = utils.get_item_string(utils_obj, response, 'title', long_url, 'xpath',
                                               ['//meta[@property="og:title"]/@content'], self.name)
-        item['authors'] = get_authors()  # ["Der Postillon"]
-        #    ['//meta[@name="author"]/@content'], self.name)
+        item['authors'] = get_authors()  
         item['description'] = utils.get_item_string(utils_obj, response, 'description', long_url, 'xpath',
                                                     ['//meta[@name="description"]/@content'], self.name)
         item['intro'] = utils.get_item_string(utils_obj, response, 'description', long_url, 'xpath',
