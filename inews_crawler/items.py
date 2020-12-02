@@ -12,7 +12,7 @@ class ArticleItem(scrapy.Item):
     short_url = scrapy.Field()      # String 'https://taz.de/!5642421/'
     long_url = scrapy.Field()       # String 'https://taz.de/Machtkampf-in-Bolivien/!5642421/'
 
-    news_site = scrapy.Field()      # String: taz, sz, heise
+    news_site = scrapy.Field()      # String: taz, sz, heise, postillon, golem
     title = scrapy.Field()          # String
     authors = scrapy.Field()        # List(String)
     description = scrapy.Field()    # String: Teaser for article, sometimes same as lead/intro
@@ -32,7 +32,7 @@ class ArticleItem(scrapy.Item):
 class LogItem(scrapy.Item):
     log_time = scrapy.Field()   # datetime.now()
     url = scrapy.Field()        # String 'https://taz.de/!5642421/'
-    news_site = scrapy.Field()  # String: taz, sz, heise
+    news_site = scrapy.Field()  # String: taz, sz, heise, postillon, golem
     property = scrapy.Field()   # String: text, title, keywords, ...
     level = scrapy.Field()      # String: warning, info
 
