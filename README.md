@@ -20,7 +20,7 @@ using common methods in `utils.py`.
     short_url           # String 'https://taz.de/!5642421/'
     long_url            # String 'https://taz.de/Machtkampf-in-Bolivien/!5642421/'
 
-    news_site           # String: taz, sz, heise
+    news_site           # String: taz, sz, heise, postillon, golem
     title               # String
     authors             # List(String)
     description         # String: Teaser for article, sometimes same as lead/intro
@@ -65,21 +65,6 @@ More settings are available in `settings.py`, for example setting the mongoDB co
     export MONGO_DATABASE="scraped_articles"
     export MONGO_PWD="password" 
     ```
-- Connect via mongo-shell: `mongo`
-    - `mongo -u <USER> -p <PASSWORD> <HOST>:<PORT>/<DB>`
-- Create collections `scraped_articles` and `log_crawler`
-    - TODO: 
-        ```
-        mongos> use s0563168
-        switched to db s0563168
-        mongos> db.createCollection("scraped_articles")
-        {
-                "code" : 6,
-                "ok" : 0,
-                "errmsg" : "Database s0563168 not found due to No route to host"
-        }
-        ```
-        - Auch nicht über ssh erfolgreich: `ssh s0...@hadoop05.f4.htw-berlin.de`
 
 #### Postillon Spider
 - Install selenium
@@ -191,7 +176,7 @@ INFO and WARNING events will be also saved (via `utils.py`) as log items in the 
 
     log_time            # datetime.now()
     url                 # String 'https://taz.de/!5642421/'
-    news_site           # String: taz, sz, heise
+    news_site           # String: taz, sz, heise, postillon, golem
     title               # String
     property            # String: text, title, keywords, ...
     level               # String: warning, info
@@ -274,7 +259,7 @@ und nutzt dabei jeweils gemeinsame Methoden in `utils.py`.
     short_url           # String 'https://taz.de/!5642421/'
     long_url            # String 'https://taz.de/Machtkampf-in-Bolivien/!5642421/'
 
-    news_site           # String: taz, sz, heise
+    news_site           # String: taz, sz, heise, postillon, golem
     title               # String
     authors             # List(String)
     description         # String: Teaser für Artikel, manchmal derselbe Text wie Lead/Intro
@@ -413,7 +398,7 @@ gespeichert.
 
     log_time            # datetime.now()
     url                 # String 'https://taz.de/!5642421/'
-    news_site           # String: taz, sz, heise
+    news_site           # String: taz, sz, heise, postillon, golem
     title               # String
     property            # String: text, title, keywords, ...
     level               # String: warning, info
