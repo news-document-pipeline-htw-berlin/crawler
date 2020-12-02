@@ -5,14 +5,20 @@ to crawl news websites, using [scrapy](https://scrapy.org/) framework .
 
 The crawler is based on 'spiders' which crawl a specific news website and extract information.
 
-every spider:
-- crawls main page for category pages
+The sz, taz and heise spiders:
+- crawl main page for category pages
 - crawls all category pages for article links
-- every crawled link is matched with database to avoid crawling duplicate articles 
+
+The postillon spider:
+- crawls the archive for article links
+- in order to dynamically load the article-previews for the desired years/months selenium is used
+- once the article-previews are present the page_source is handed over to scrapy
+
+Every spider:
+- matches all crawled links with database to avoid crawling duplicate articles 
 - crawls article links for article and meta data (as defined in `items.py`)
 - saves data in database in collection `scraped_articles` (via `pipelines.py`) 
-
-using common methods in `utils.py`.
+- uses the common methods in `utils.py`.
 
 ### Output in MongoDB
 
@@ -256,15 +262,20 @@ zum Crawlen von Newsseiten, nutzt das Framework [scrapy](https://scrapy.org/).
 
 Der Crawler basiert auf 'Spider', die eine spezifische Newsseite crawlen und Informationen extrahieren.
 
-Jeder Spider:
+Die sz, taz und heise Spider:
 - crawlt die Hauptseite nach Kategorienseiten
 - crawlt alle Kategorienseiten nach Links zu Artikeln
-- jeder gefundene Link wird mit der Datenbank abgeglichen, um zu vermeiden, Artikel mehrfach zu crawlen. 
+
+Die Postillon Spider:
+- crawlt das Archiv nach Links zu Artikeln
+- verwendet Selenium um die Artikel-Previews dynamisch für die gewünschten Jahre/Monate zu laden
+- sorgt für eine Übergabe des Quellcodes der Seite von Selenium an Scrapy, sobald die Artikel-Previews präsent sind
+
+Jede Spider:
+- gleicht alle gefundenen Links mit der Datenbank ab, um mehrfaches crawlen zu vermeiden.
 - crawlt die Artikellinks und extrahiert den Artikel und Metadaten (wie in `items.py` definiert)
 - speichert die Daten in der Datenbank-Collection `scraped_articles` (via `pipelines.py`). 
-
-und nutzt dabei jeweils gemeinsame Methoden in `utils.py`.
-
+- unter Verwendung gemeinsamer Methoden in `utils.py`.
 
 ### Output in MongoDB
 
