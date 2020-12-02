@@ -51,6 +51,16 @@ You also need access to the database (directly or via VPN)
 
 More settings are available in `settings.py`, for example setting the mongoDB collection names.
 
+#### Postillon Spider
+- Install selenium
+    ```
+    pip3 install selenium
+    ```
+- Install geckodriver
+    ``` 
+    sudo apt install firefox-geckodriver
+    ```
+
 ### Local Setup
 - Install mongodb
 - Run mongo daemon: `mongod`
@@ -66,13 +76,6 @@ More settings are available in `settings.py`, for example setting the mongoDB co
     export MONGO_PWD="password" 
     ```
 
-#### Postillon Spider
-- Install selenium
-    ```
-    pip3 install selenium
-    ```
-- Install geckodriver
-    ``` sudo apt install firefox-geckodriver
 
 ### Test run
 
@@ -157,6 +160,16 @@ For building the archive, you can use `0` to get the maximum amount of articles,
 If you want to build the archive, please study the options in `settings.py` to slow down the spider.
 Don't forget to set the testrun variables to zero.
 
+
+#### 4) postillon
+
+It is possible to crawl postillon articles way back in the past. 
+`year_to_crawl` sets the year to be crawled. In addition `limit_min_month_of_year_to_crawl` can be used to define the first month of the year to be crawled. 
+
+For building the archive, you can set both to `False` to get the maximum amount of articles, but for daily use `year_to_crawl=2020` and `limit_min_month_of_year_to_crawl=10` (assuming it is October 2020) should be enough.
+ 
+If you want to build the archive, please study the options in `settings.py` to slow down the spider.
+Don't forget to set the testrun variables to zero or False.
 
 ----------------------------------------------------------
 
@@ -290,6 +303,30 @@ Es wird außerdem Zugang zur Datenbank benötigt (direkt oder via VPN)
 
 Mehr Einstellungen sind möglich in `settings.py`, zum Beispiel die Namen der mongoDB-Collection.
 
+#### Postillon Spider
+- Installiere selenium
+    ```
+    pip3 install selenium
+    ```
+- Installiere geckodriver
+    ``` 
+    sudo apt install firefox-geckodriver
+    ```
+
+### Local Setup
+- Installiere mongodb
+- Führ mongo daemon aus: `mongod`
+    - Mit custom db-Pfad ausführen: `mongod --dbpath=./data-mongodb`
+- Öffne mongo shell: `mongo`
+- Erstelle Datenbank: `use scraped_articles`
+- Erstelle Benutzer: `db.createUser({user:"username",pwd:"password",roles:["readWrite", "dbAdmin"]})`
+- Aktualisiere Umgebungsvariablen in  `~/.profile`:
+    ```
+    export MONGO_USER="username"
+    export MONGO_HOST="localhost:27017"
+    export MONGO_DATABASE="scraped_articles"
+    export MONGO_PWD="password" 
+    ```
 
 ### Testlauf
 
@@ -378,6 +415,16 @@ Im täglichen Gebrauch sollte `3` or `4` genug sein.
 Wenn es um den Grundstock geht, können die Optionen in `settings.py` genutzt werden, um den Spider zu verlangsamen. 
 Dabei nicht vergessen, die Testlauf-Variablen vorher auf Null zu setzen.
 
+
+#### 4) postillon
+
+Bei postillon ist es auch möglich, auf sehr alte Artikel zuzugreifen.
+`year_to_crawl` definiert das zu crawlende Jahr. Zusätzlich kann `limit_min_month_of_year_to_crawl` verwendet werden um den ersten zu crawlenden Monat des definierten Jahres zu definieren.
+
+Um einen Grundstock an Artikeln zu bilden, können beide Limitierungen auf `False` gesetzt werden. Im täglichen Gebrauch sollte `year_to_crawl=2020` und `limit_min_month_of_year_to_crawl=10` (angenommen es sei October 2020) ausreichend sein.
+ 
+Wenn es um den Grundstock geht, können die Optionen in `settings.py` genutzt werden, um den Spider zu verlangsamen. 
+Dabei nicht vergessen, die Testlauf-Variablen vorher auf Null oder False zu setzen.
 
 ----------------------------------------------------------
 

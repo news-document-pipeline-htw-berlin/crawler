@@ -100,7 +100,7 @@ ITEM_PIPELINES = {
     'inews_crawler.pipelines.MongoPipeline': 300,
 }
 
-# Enable and configure the AutoThrottle extension (disabled by default)
+# Enable and configure the AutoThrottle extension to slow down crawling speed (disabled by default)
 # See https://docs.scrapy.org/en/latest/topics/autothrottle.html
 #AUTOTHROTTLE_ENABLED = True
 # The initial download delay
