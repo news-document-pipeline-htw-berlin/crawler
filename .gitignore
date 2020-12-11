@@ -113,3 +113,6 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+
+# MongoDB
+data_mongodb/

@@ -5,14 +5,20 @@ to crawl news websites, using [scrapy](https://scrapy.org/) framework .
 
 The crawler is based on 'spiders' which crawl a specific news website and extract information.
 
-every spider:
-- crawls main page for category pages
+The sz, taz and heise spiders:
+- crawl main page for category pages
 - crawls all category pages for article links
-- every crawled link is matched with database to avoid crawling duplicate articles 
+
+The postillon spider:
+- crawls the archive for article links
+- in order to dynamically load the article-previews for the desired years/months selenium is used
+- once the article-previews are present the page_source is handed over to scrapy
+
+Every spider:
+- matches all crawled links with database to avoid crawling duplicate articles 
 - crawls article links for article and meta data (as defined in `items.py`)
 - saves data in database in collection `scraped_articles` (via `pipelines.py`) 
-
-using common methods in `utils.py`.
+- uses the common methods in `utils.py`.
 
 ### Output in MongoDB
 
@@ -20,7 +26,7 @@ using common methods in `utils.py`.
     short_url           # String 'https://taz.de/!5642421/'
     long_url            # String 'https://taz.de/Machtkampf-in-Bolivien/!5642421/'
 
-    news_site           # String: taz, sz, heise
+    news_site           # String: taz, sz, heise, postillon, golem
     title               # String
     authors             # List(String)
     description         # String: Teaser for article, sometimes same as lead/intro
@@ -38,7 +44,7 @@ For execution you need to save the database authentification data in your `~/.pr
 
 ```
 export MONGO_USER="s0..."
-export MONGO_HOST="host:port
+export MONGO_HOST="host:port"
 export MONGO_DATABASE="s0..."
 export MONGO_PWD="password" 
 ``` 
@@ -50,6 +56,31 @@ export MONGO_PWD="password"
 You also need access to the database (directly or via VPN)
 
 More settings are available in `settings.py`, for example setting the mongoDB collection names.
+
+#### Postillon Spider
+- Install selenium
+    ```
+    pip3 install selenium
+    ```
+- Install geckodriver
+    ``` 
+    sudo apt install firefox-geckodriver
+    ```
+
+### Local Setup
+- Install mongodb
+- Run mongo daemon: `mongod`
+    - Run with custom db path: `mongod --dbpath=./data-mongodb`
+- Open mongo shell: `mongo`
+- Create database: `use scraped_articles`
+- Create user: `db.createUser({user:"username",pwd:"password",roles:["readWrite", "dbAdmin"]})`
+- Update environment variables in `~/.profile`:
+    ```
+    export MONGO_USER="username"
+    export MONGO_HOST="localhost:27017"
+    export MONGO_DATABASE="scraped_articles"
+    export MONGO_PWD="password" 
+    ```
 
 
 ### Test run
@@ -136,6 +167,16 @@ If you want to build the archive, please study the options in `settings.py` to s
 Don't forget to set the testrun variables to zero.
 
 
+#### 4) postillon
+
+It is possible to crawl postillon articles way back in the past. 
+`year_to_crawl` sets the year to be crawled. In addition `limit_min_month_of_year_to_crawl` can be used to define the first month of the year to be crawled. 
+
+For building the archive, you can set both to `False` to get the maximum amount of articles, but for daily use `year_to_crawl=2020` and `limit_min_month_of_year_to_crawl=10` (assuming it is October 2020) should be enough.
+ 
+If you want to build the archive, please study the options in `settings.py` to slow down the spider.
+Don't forget to set the testrun variables to zero or False.
+
 ----------------------------------------------------------
 
 ### Logging
@@ -154,7 +195,7 @@ INFO and WARNING events will be also saved (via `utils.py`) as log items in the 
 
     log_time            # datetime.now()
     url                 # String 'https://taz.de/!5642421/'
-    news_site           # String: taz, sz, heise
+    news_site           # String: taz, sz, heise, postillon, golem
     title               # String
     property            # String: text, title, keywords, ...
     level               # String: warning, info
@@ -221,15 +262,20 @@ zum Crawlen von Newsseiten, nutzt das Framework [scrapy](https://scrapy.org/).
 
 Der Crawler basiert auf 'Spider', die eine spezifische Newsseite crawlen und Informationen extrahieren.
 
-Jeder Spider:
+Die sz, taz und heise Spider:
 - crawlt die Hauptseite nach Kategorienseiten
 - crawlt alle Kategorienseiten nach Links zu Artikeln
-- jeder gefundene Link wird mit der Datenbank abgeglichen, um zu vermeiden, Artikel mehrfach zu crawlen. 
+
+Die Postillon Spider:
+- crawlt das Archiv nach Links zu Artikeln
+- verwendet Selenium um die Artikel-Previews dynamisch für die gewünschten Jahre/Monate zu laden
+- sorgt für eine Übergabe des Quellcodes der Seite von Selenium an Scrapy, sobald die Artikel-Previews präsent sind
+
+Jede Spider:
+- gleicht alle gefundenen Links mit der Datenbank ab, um mehrfaches crawlen zu vermeiden.
 - crawlt die Artikellinks und extrahiert den Artikel und Metadaten (wie in `items.py` definiert)
 - speichert die Daten in der Datenbank-Collection `scraped_articles` (via `pipelines.py`). 
-
-und nutzt dabei jeweils gemeinsame Methoden in `utils.py`.
-
+- unter Verwendung gemeinsamer Methoden in `utils.py`.
 
 ### Output in MongoDB
 
@@ -237,7 +283,7 @@ und nutzt dabei jeweils gemeinsame Methoden in `utils.py`.
     short_url           # String 'https://taz.de/!5642421/'
     long_url            # String 'https://taz.de/Machtkampf-in-Bolivien/!5642421/'
 
-    news_site           # String: taz, sz, heise
+    news_site           # String: taz, sz, heise, postillon, golem
     title               # String
     authors             # List(String)
     description         # String: Teaser für Artikel, manchmal derselbe Text wie Lead/Intro
@@ -268,6 +314,30 @@ Es wird außerdem Zugang zur Datenbank benötigt (direkt oder via VPN)
 
 Mehr Einstellungen sind möglich in `settings.py`, zum Beispiel die Namen der mongoDB-Collection.
 
+#### Postillon Spider
+- Installiere selenium
+    ```
+    pip3 install selenium
+    ```
+- Installiere geckodriver
+    ``` 
+    sudo apt install firefox-geckodriver
+    ```
+
+### Local Setup
+- Installiere mongodb
+- Führ mongo daemon aus: `mongod`
+    - Mit custom db-Pfad ausführen: `mongod --dbpath=./data-mongodb`
+- Öffne mongo shell: `mongo`
+- Erstelle Datenbank: `use scraped_articles`
+- Erstelle Benutzer: `db.createUser({user:"username",pwd:"password",roles:["readWrite", "dbAdmin"]})`
+- Aktualisiere Umgebungsvariablen in  `~/.profile`:
+    ```
+    export MONGO_USER="username"
+    export MONGO_HOST="localhost:27017"
+    export MONGO_DATABASE="scraped_articles"
+    export MONGO_PWD="password" 
+    ```
 
 ### Testlauf
 
@@ -357,6 +427,16 @@ Wenn es um den Grundstock geht, können die Optionen in `settings.py` genutzt we
 Dabei nicht vergessen, die Testlauf-Variablen vorher auf Null zu setzen.
 
 
+#### 4) postillon
+
+Bei postillon ist es auch möglich, auf sehr alte Artikel zuzugreifen.
+`year_to_crawl` definiert das zu crawlende Jahr. Zusätzlich kann `limit_min_month_of_year_to_crawl` verwendet werden um den ersten zu crawlenden Monat des definierten Jahres zu definieren.
+
+Um einen Grundstock an Artikeln zu bilden, können beide Limitierungen auf `False` gesetzt werden. Im täglichen Gebrauch sollte `year_to_crawl=2020` und `limit_min_month_of_year_to_crawl=10` (angenommen es sei October 2020) ausreichend sein.
+ 
+Wenn es um den Grundstock geht, können die Optionen in `settings.py` genutzt werden, um den Spider zu verlangsamen. 
+Dabei nicht vergessen, die Testlauf-Variablen vorher auf Null oder False zu setzen.
+
 ----------------------------------------------------------
 
 ### Logging
@@ -376,7 +456,7 @@ gespeichert.
 
     log_time            # datetime.now()
     url                 # String 'https://taz.de/!5642421/'
-    news_site           # String: taz, sz, heise
+    news_site           # String: taz, sz, heise, postillon, golem
     title               # String
     property            # String: text, title, keywords, ...
     level               # String: warning, info

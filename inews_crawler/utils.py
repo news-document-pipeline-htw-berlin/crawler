@@ -14,7 +14,7 @@ log_collection_name = LOG_COLLECTION_NAME
 client = MongoClient(MONGO_URI)
 db = client[MONGO_DATABASE]
 
-
+# TODO: pylint: add self as first argument of all functions and check usages
 class utils(object):
 
     # db
@@ -25,8 +25,9 @@ class utils(object):
 
     # saving log item to log_collection in database
     def log_event(self, news_site, url, property_name, level):
+        print("logging event") # TODO: remove
         log_item = LogItem()
-        log_item['news_site'] = news_site           # String: taz, sz, heise
+        log_item['news_site'] = news_site           # String: taz, sz, heise, postillon, golem
         log_item['log_time'] = datetime.now()       # datetime
         log_item['url'] = url                       # String 'https://taz.de/!5642421/'
         log_item['property'] = property_name        # String: text, title, keywords, ...
@@ -74,11 +75,11 @@ class utils(object):
 
     # limit spider
 
-    def limit_crawl(list,number):
-        if list is not None and number > 0 and number < len(list):
-                return list[:number]
+    def limit_crawl(list_,number):
+        if list_ is not None and number > 0 and number < len(list_):
+                return list_[:number]
         else:
-            return list
+            return list_
 
 
 
