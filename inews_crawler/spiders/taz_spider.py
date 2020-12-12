@@ -8,8 +8,8 @@ from ..utils import utils
 root = 'https://taz.de'
 short_url_regex = "!\d{5,}"         # helps converting long to short url: https://taz.de/!2345678/
 
-testrun_cats = 5                    # limits the categories to crawl to this number. if zero, no limit.
-testrun_arts = 10                   # limits the article links to crawl to this number. if zero, no limit.
+testrun_cats = 0                    # limits the categories to crawl to this number. if zero, no limit.
+testrun_arts = 0                   # limits the article links to crawl to this number. if zero, no limit.
                                     # For deployment: don't forget to set the testrun variables to zero
 
 class TazSpider(scrapy.Spider):
