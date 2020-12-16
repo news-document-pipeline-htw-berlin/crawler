@@ -75,7 +75,6 @@ class utils(object):
 
 
     # limit spider
-    
     @staticmethod
     def limit_crawl(list_,number):
         if list_ is not None and number > 0 and number < len(list_):
