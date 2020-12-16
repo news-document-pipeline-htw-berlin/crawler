@@ -75,23 +75,11 @@ class utils(object):
 
 
     # limit spider
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> added golem crawler, fixed old crawlers
+    
     @staticmethod
-    def limit_crawl(list,number):
-        if list is not None and number > 0 and number < len(list):
-                return list[:number]
-<<<<<<< HEAD
-=======
-
     def limit_crawl(list_,number):
         if list_ is not None and number > 0 and number < len(list_):
                 return list_[:number]
->>>>>>> Add parse article functionality for postillon
-=======
->>>>>>> added golem crawler, fixed old crawlers
         else:
             return list_
 
