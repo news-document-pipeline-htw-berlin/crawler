@@ -18,7 +18,7 @@ db = client[MONGO_DATABASE]
 class utils(object):
 
     # db
-
+    @staticmethod
     def is_url_in_db(url):
         url_db = db[article_collection_name].find_one({"short_url": url}, {"short_url": 1})
         return url_db is not None
@@ -48,7 +48,7 @@ class utils(object):
             for url in url_list:
                 complete_urls.append(self.add_host_to_url(url, root))
         return complete_urls
-
+    @staticmethod
     def get_short_url(url, root, regex):
         if url is not None:
             regex = re.search(regex, url)
@@ -58,13 +58,14 @@ class utils(object):
 
 
     # item handling
-
+    @staticmethod
     def not_none_string(s):
         result = ""
         if s is not None:
             result = s
         return result
-
+        
+    @staticmethod
     def not_none_list(l):
         result = []
         if l is not None:
@@ -74,7 +75,7 @@ class utils(object):
 
 
     # limit spider
-
+    @staticmethod
     def limit_crawl(list_,number):
         if list_ is not None and number > 0 and number < len(list_):
                 return list_[:number]

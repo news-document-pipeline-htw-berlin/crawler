@@ -9,12 +9,13 @@ root = 'https://taz.de'
 short_url_regex = "!\d{5,}"         # helps converting long to short url: https://taz.de/!2345678/
 
 testrun_cats = 0                    # limits the categories to crawl to this number. if zero, no limit.
-testrun_arts = 0                    # limits the article links to crawl to this number. if zero, no limit.
+testrun_arts = 0                   # limits the article links to crawl to this number. if zero, no limit.
                                     # For deployment: don't forget to set the testrun variables to zero
 
 class TazSpider(scrapy.Spider):
     name = "taz"
     start_url = root
+
 
     def start_requests(self):
         yield scrapy.Request(self.start_url, callback=self.parse)
@@ -35,7 +36,10 @@ class TazSpider(scrapy.Spider):
             linkclasses = [
                 "objlink report article",
                 "objlink report article leaded pictured",
+                "objlink report article leaded pictured noavatar",
+                "objlink longread article leaded pictured noavatar",
                 "objlink brief report article leaded",
+                "objlink brief report article leaded noavatar",
                 "objlink brief report article pictured",
                 "objlink subjective commentary article",
                 "objlink brief subjective column article leaded"]
@@ -50,7 +54,8 @@ class TazSpider(scrapy.Spider):
 
         linklist = response.xpath(getLinkselector()).extract()
         linklist = utils.limit_crawl(linklist,testrun_arts)
-        if linklist:
+
+        if len(linklist) > 0:
             for long_url in linklist:
                 short_url = utils.get_short_url(long_url, root, short_url_regex)
                 if short_url and not utils.is_url_in_db(short_url):  # db-query
@@ -62,6 +67,7 @@ class TazSpider(scrapy.Spider):
 
 
     def parse_article(self, response, short_url, long_url):
+
         utils_obj = utils()
 
         def get_article_text():

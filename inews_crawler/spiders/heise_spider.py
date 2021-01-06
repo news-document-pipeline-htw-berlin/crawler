@@ -9,10 +9,10 @@ root = 'https://www.heise.de'
 short_url_regex="\-[0-9]\d{6,}"       # helps converting long to short url: https://www.heise.de/-4642199
 full_article_addition = '?seite=all'  # if article extends over multiple pages this url addition will get the full article
 
-testrun_cats = 0    # limits the categories to crawl to this number. if zero, no limit.
-testrun_arts = 0    # limits the article links to crawl per category page to this number. if zero, no limit.
+testrun_cats = 10    # limits the categories to crawl to this number. if zero, no limit.
+testrun_arts = 10    # limits the article links to crawl per category page to this number. if zero, no limit.
 
-limit_pages = 4     # => 1. building the archive: 0
+limit_pages = 0     # => 1. building the archive: 0
                     # => 2. daily use: 3 or 4
                     # don't forget to set the testrun variables to zero
 
@@ -27,8 +27,9 @@ class HeiseSpider(scrapy.Spider):
 
     # scrape main page for categories
     def parse(self, response):
-        departments = response.css(".nav-category__list .nav-category__item a").xpath("@href").extract()
+        departments = response.css(".navigation__head").xpath("@href").extract()
         departments = utils.limit_crawl(departments, testrun_cats)
+
         for department_url in departments:
             department_url = root + department_url
             yield scrapy.Request(department_url,
@@ -61,9 +62,10 @@ class HeiseSpider(scrapy.Spider):
         department_name = utils.get_item_string(utils_obj, response, 'department', department_url, 'xpath',
                                                 ['//meta[@name="title"]/@content'], self.name)
         articles = response.css(".stage--top article").extract() \
-                   + response.xpath('//section[@class="article-index"]/article').extract()
+                   + response.xpath('//div[@class="article-index"]/article').extract()
 
         limited_articles = utils.limit_crawl(articles,testrun_arts)
+
 
         for article in limited_articles:
             article_html = Selector(text=article)
