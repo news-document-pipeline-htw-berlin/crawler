@@ -1,5 +1,6 @@
 #!/bin/bash
-
 curl http://localhost:6800/schedule.json -d project=inews_crawler -d spider=sueddeutsche
 curl http://localhost:6800/schedule.json -d project=inews_crawler -d spider=taz
 curl http://localhost:6800/schedule.json -d project=inews_crawler -d spider=heise
+curl http://localhost:6800/schedule.json -d project=inews_crawler -d spider=golem
+curl http://localhost:6800/schedule.json -d project=inews_crawler -d spider=postillon

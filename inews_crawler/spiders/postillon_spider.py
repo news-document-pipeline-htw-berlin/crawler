@@ -21,9 +21,9 @@ testrun_articles = False
 # 'https://www.der-postillon.com/2020/11/agent-smith.html'
 testrun_article_url = False
 
-year_to_crawl = 2020  # If False or 0, crawl all years
+year_to_crawl = datetime.now().year  # If False or 0, crawl all years
 # limits to crawl only articles of the year beginning with the specified month (newer or equal). If False or 0, crawl entire year. Requires year_to_crawl to not be False
-limit_min_month_of_year_to_crawl = False
+limit_min_month_of_year_to_crawl = datetime.now().month # False
 
 AUTHOR_DIC = {
     "ssi": "Stefan Sichermann",
