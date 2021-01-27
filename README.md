@@ -67,6 +67,18 @@ More settings are available in `settings.py`, for example setting the mongoDB co
     sudo apt install firefox-geckodriver
     ```
 
+#### Golem Spider
+- Fix missing locale error by installing de_DE locale
+    ```
+    sudo locale-gen de_DE
+    sudo update-locale
+    ```
+    - Verify locale is present: 
+        ```
+        locale -a | grep de_DE
+        ```
+
+
 ### Local Setup
 - Install mongodb
 - Run mongo daemon: `mongod`
