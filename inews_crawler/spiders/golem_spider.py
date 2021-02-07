@@ -7,7 +7,7 @@ from ..utils import utils
 import logging
 import re
 
-max_articles_per_month = 10
+max_articles_per_month = 20
 number_of_months = 1
 
 
@@ -199,7 +199,7 @@ class PostsSpider(Spider):
 
         timeformat = r"%d. %B %Y, %H:%M Uhr"
         # set locale to german for correct date parsing
-        locale.setlocale(locale.LC_TIME, 'de_DE')
+        locale.setlocale(locale.LC_TIME, 'de_DE.utf8')
         item['published_time'] = datetime.strptime(published_time, timeformat)
 
         item['image_links'] = images
