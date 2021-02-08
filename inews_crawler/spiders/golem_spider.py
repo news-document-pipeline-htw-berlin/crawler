@@ -195,7 +195,7 @@ class PostsSpider(Spider):
         item['intro'] = intro
         item['text'] = texts
 
-        #item['keywords'] = key_words
+        item['keywords'] = []
 
         timeformat = r"%d. %B %Y, %H:%M Uhr"
         # set locale to german for correct date parsing

@@ -189,6 +189,15 @@ For building the archive, you can set both to `False` to get the maximum amount 
 If you want to build the archive, please study the options in `settings.py` to slow down the spider.
 Don't forget to set the testrun variables to zero or False.
 
+
+
+#### 4) golem
+It is possible to crawl golem articles way back in the past. 
+`number_of_months` sets the months to be crawled. Set it to 1 to crawl only articles from current month.
+`max_articles_per_month` limits the amount of articles to be crawled from (past) months. Set it to -1 for no limit.
+
+
+
 ----------------------------------------------------------
 
 ### Logging
@@ -448,6 +457,15 @@ Um einen Grundstock an Artikeln zu bilden, können beide Limitierungen auf `Fals
  
 Wenn es um den Grundstock geht, können die Optionen in `settings.py` genutzt werden, um den Spider zu verlangsamen. 
 Dabei nicht vergessen, die Testlauf-Variablen vorher auf Null oder False zu setzen.
+
+
+
+#### 4) golem
+Es ist möglich, Golem-Artikel der Vergangenheit zu crawlen.
+`number_of_months` legt fest, wie viele Monate zurückgecrawled werden soll. Um nur aktuelle Artikel zu crawlen, setzt man den Parameter auf 1.
+`max_articles_per_month` legt fest, wie viele Artikel pro Monat gecrawled werden sollen. Möchte man keine Limitierung, dann setzt man den Parameter auf -1.
+
+
 
 ----------------------------------------------------------
 
