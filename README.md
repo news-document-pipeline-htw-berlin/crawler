@@ -57,16 +57,47 @@ You also need access to the database (directly or via VPN)
 
 More settings are available in `settings.py`, for example setting the mongoDB collection names.
 
-#### Postillon Spider
-- Install selenium
+### Setup for Postillon Spider
+- Install Selenium
     ```
     pip3 install selenium
     ```
-- Install geckodriver
-    ``` 
-    sudo apt install firefox-geckodriver
-    ```
-
+    - In VM Environment install globally:
+        ```
+        sudo -H pip3 install selenium
+        ```
+- Install Chromium driver 
+    - Ubuntu:
+        ``` 
+        sudo apt-get install chromium-chromedriver
+        ```
+        - Alternatively install firefox-geckodriver (if option to use Firefox ist set)
+            ```
+            sudo apt install firefox-geckodriver
+            ```
+    - Debian:
+        ```
+        sudo apt-get install chromedriver
+        ```
+        
+- Install Chromium or Chrome (or Firefox if option to use Firefox instead is set)
+    - Ubuntu:
+        ```
+        sudo apt-get update
+        sudo apt-get install chromium-browser
+        ```
+        - This is a transactional package, which installs the chromium snap: 
+            ```
+            # 1. Enable snapd
+            sudo apt update && sudo apt install snapd && sudo snap install core
+            # 2. Install chromium snap
+            sudo snap install chromium
+            ```
+    - Debian:
+        ```
+        sudo apt-get install chromium chromium-l10n
+        ```
+    
 #### Golem Spider
 - Fix missing locale error by installing de_DE locale
     ```
