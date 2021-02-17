@@ -5,6 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import TimeoutException
+from selenium.webdriver.chrome.options import Options
 import logging
 from datetime import datetime
 from ..items import ArticleItem
@@ -16,14 +17,17 @@ root = 'https://www.der-postillon.com/p/das-postillon-archiv.html'
 
 # For deployment: don't forget to set the testrun variables to 0
 # limits number of articles. If 0/False, no limit.
-testrun_articles = False
+TESTRUN_ARTICLES_LIMIT = False
 # Only scrape the specified article. Full URL required or False/0 to disable this limit
 # 'https://www.der-postillon.com/2020/11/agent-smith.html'
-testrun_article_url = False
+TESTRUN_ARTICLE_URL = False
 
-year_to_crawl = datetime.now().year  # If False or 0, crawl all years
-# limits to crawl only articles of the year beginning with the specified month (newer or equal). If False or 0, crawl entire year. Requires year_to_crawl to not be False
-limit_min_month_of_year_to_crawl = datetime.now().month # False
+YEAR_TO_CRAWL = datetime.now().year  # If False or 0, crawl all years
+# limits to crawl only articles of the year beginning with the specified month (newer or equal). If False or 0, crawl entire year. Requires YEAR_TO_CRAWL to not be False
+LIMIT_MIN_MONTH_OF_YEAR_TO_CRAWL = datetime.now().month  # False
+
+# Option to select eitcher Chrome or Firefox webdriver (because of compatibility-issues with Firefox during deployment on Debian)
+SELENIUM_DRIVER = 'Chromium' # 'Firefox'  
 
 AUTHOR_DIC = {
     "ssi": "Stefan Sichermann",
@@ -54,11 +58,11 @@ class PostillonSpider(scrapy.Spider):
 
     def start_requests(self):
         '''
-        Generates a request for the URL specified in start_url and defines self.parse as callback function, if testrun_article_url is not defined. 
-        Else a request for testrun_article_url is genereated and self.parse_article is defined as callback function.
+        Generates a request for the URL specified in start_url and defines self.parse as callback function, if TESTRUN_ARTICLE_URL is not defined. 
+        Else a request for TESTRUN_ARTICLE_URL is genereated and self.parse_article is defined as callback function.
         '''
-        if testrun_article_url:
-            yield scrapy.Request(testrun_article_url, callback=self.parse_article, cb_kwargs=dict(long_url=testrun_article_url, published_time="13.11.2020"))
+        if TESTRUN_ARTICLE_URL:
+            yield scrapy.Request(TESTRUN_ARTICLE_URL, callback=self.parse_article, cb_kwargs=dict(long_url=TESTRUN_ARTICLE_URL, published_time="13.11.2020"))
         else:
             yield scrapy.Request(self.start_url, callback=self.parse)
 
@@ -73,20 +77,23 @@ class PostillonSpider(scrapy.Spider):
             The response from a scrapy request
         '''
         def init_selenium_driver():
+
             '''
-            Initialize and return a firefox selenium driver.
+            Initialize and return a firefox or chorme selenium driver depending on the option SELENIUM_DRIVER 
 
             Returns
             -------
-            A firefox selenium driver
+            A firefox or chrome selenium driver depending on the option SELENIUM_DRIVER
             '''
-            firefoxOptions = webdriver.FirefoxOptions()
-            firefoxOptions.headless = True
-            desired_capabilities = firefoxOptions.to_capabilities()
-            driver = webdriver.Firefox(
-                desired_capabilities=desired_capabilities)
-
-            #
+            if SELENIUM_DRIVER == 'Firefox':
+                firefoxOptions = webdriver.FirefoxOptions()
+                firefoxOptions.headless = True
+                desired_capabilities = firefoxOptions.to_capabilities()
+                driver = webdriver.Firefox(desired_capabilities=desired_capabilities)
+            else: # Chrome driver
+                chrome_options = Options()
+                chrome_options.headless = True
+                driver = webdriver.Chrome(options=chrome_options)
             return driver
 
         def get_closed_elements():
@@ -97,31 +104,31 @@ class PostillonSpider(scrapy.Spider):
             -------
             All or some closed year and month elements, depending on the limit definitions.
             '''
-            # Get all closed months of year to crawl, that are newer or equal to the limit specified by limit_min_month_of_year_to_crawl
-            if limit_min_month_of_year_to_crawl:
+            # Get all closed months of year to crawl, that are newer or equal to the limit specified by LIMIT_MIN_MONTH_OF_YEAR_TO_CRAWL
+            if LIMIT_MIN_MONTH_OF_YEAR_TO_CRAWL:
                 # get year
-                element_of_year_to_crawl = driver.find_element_by_class_name(
-                    'year-' + str(year_to_crawl))
+                element_of_YEAR_TO_CRAWL = driver.find_element_by_class_name(
+                    'year-' + str(YEAR_TO_CRAWL))
 
                 # Get closed months
                 xpath = ".//li[contains(@class, 'closed') and (contains(@class, 'month-12')"
-                for month in range(limit_min_month_of_year_to_crawl-1, 12):
-                    xpath += " or contains(@class, 'month-" + \
-                        f'{month+1:02d}' + "')"
+                for month in range(LIMIT_MIN_MONTH_OF_YEAR_TO_CRAWL-1, 12):
+                    month_plus_1 = month + 1
+                    xpath += " or contains(@class, 'month-" + "{:02d}".format(month+1) + "')"
                 xpath = xpath + ")]"
 
-                closed_elements = element_of_year_to_crawl.find_elements_by_xpath(
+                closed_elements = element_of_YEAR_TO_CRAWL.find_elements_by_xpath(
                     xpath)
-                closed_elements.append(element_of_year_to_crawl)
+                closed_elements.append(element_of_YEAR_TO_CRAWL)
 
             # Get all closed months of year to crawl
-            elif year_to_crawl:
-                element_of_year_to_crawl = driver.find_element_by_class_name(
-                    'year-' + str(year_to_crawl))
+            elif YEAR_TO_CRAWL:
+                element_of_YEAR_TO_CRAWL = driver.find_element_by_class_name(
+                    'year-' + str(YEAR_TO_CRAWL))
 
-                closed_elements = element_of_year_to_crawl.find_elements_by_class_name(
+                closed_elements = element_of_YEAR_TO_CRAWL.find_elements_by_class_name(
                     'closed')
-                closed_elements.append(element_of_year_to_crawl)
+                closed_elements.append(element_of_YEAR_TO_CRAWL)
 
             # Get all closed years/months of the entire archive
             else:
@@ -133,7 +140,7 @@ class PostillonSpider(scrapy.Spider):
         def waitForLoad():
             '''
             Wait until at 1 article per year has been loaded. 
-            If the current year is being crawled wait until an article of january or limit_min_month_of_year_to_crawl 
+            If the current year is being crawled wait until an article of january or LIMIT_MIN_MONTH_OF_YEAR_TO_CRAWL 
             has been loaded (Because the current month of the current year is already loaded on page load).
 
             '''
@@ -141,19 +148,19 @@ class PostillonSpider(scrapy.Spider):
             TIMEOUT = 20
             wait = WebDriverWait(driver, TIMEOUT)
             try:
-                # xpath for tag that with class 'date' and content that includes '2020' or '1.2020' or '<limit_min_month_of_year_to_crawl>.2020',
+                # xpath for tag that with class 'date' and content that includes '2020' or '1.2020' or '<LIMIT_MIN_MONTH_OF_YEAR_TO_CRAWL>.2020',
                 # depending on what is to be crawled
                 xpath = "//a/div/div/div[contains(@class, 'date') and contains(string(), '"
-                if year_to_crawl:
+                if YEAR_TO_CRAWL:
                     # If the current year is crawled wait for an article of the first month to be loaded.
                     # This is necessary because the current month is already loaded on page load.
-                    if year_to_crawl == CURRENT_YEAR:
-                        if limit_min_month_of_year_to_crawl:
-                            xpath += str(limit_min_month_of_year_to_crawl) + "."
+                    if YEAR_TO_CRAWL == CURRENT_YEAR:
+                        if LIMIT_MIN_MONTH_OF_YEAR_TO_CRAWL:
+                            xpath += str(LIMIT_MIN_MONTH_OF_YEAR_TO_CRAWL) + "."
                         else:
                             xpath += "1."
 
-                    xpath += str(year_to_crawl) + "')]"
+                    xpath += str(YEAR_TO_CRAWL) + "')]"
                     wait.until(EC.presence_of_element_located(
                         (By.XPATH, xpath)))
 
@@ -207,13 +214,13 @@ class PostillonSpider(scrapy.Spider):
         # for all ul tags with class 'month-inner' get all contained li tags and get their direct a-tag children
         articleList = sel.xpath('//ul[@class="month-inner"]//li/a')
 
-        articleList = utils.limit_crawl(articleList, testrun_articles)
+        articleList = utils.limit_crawl(articleList, TESTRUN_ARTICLES_LIMIT)
 
         if articleList:
             for article in articleList:
                 # extract the value of the href attribute from article
                 long_url = article.xpath('./@href').extract()[0]
-                # extract the content of div-tags with class 'date' contained by article 
+                # extract the content of div-tags with class 'date' contained by article
                 published_time = article.xpath(
                     './/div[@class="date"]/text()').extract()
                 published_time = published_time[0] if len(
@@ -264,7 +271,7 @@ class PostillonSpider(scrapy.Spider):
             for tag in tags:
                 line = ""
                 tag_selector = Selector(text=tag)
-                # extract the text from all tags contained in tag_selector 
+                # extract the text from all tags contained in tag_selector
                 text_list = tag_selector.xpath('//text()').extract()
                 for text_part in text_list:
                     line += text_part
