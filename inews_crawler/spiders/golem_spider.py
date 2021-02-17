@@ -14,7 +14,8 @@ number_of_months = 1
 class PostsSpider(Spider):
     name = 'golem'
 
-    def generate_archive_urls(self, number_of_months):
+    @staticmethod
+    def generate_archive_urls(number_of_months):
         '''
         Generate urls containing article links per month
 
@@ -110,7 +111,8 @@ class PostsSpider(Spider):
         request.headers['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/86.0.4240.111 Safari/537.36'
         return request
 
-    def generate_short_url(self, url):
+    @staticmethod
+    def generate_short_url(url):
         '''
         Generate short article url
 
@@ -126,6 +128,33 @@ class PostsSpider(Spider):
         pattern = re.compile(r'(\d+)(?!.*\d).html')
         num = pattern.search(url).group(1)
         return 'https://glm.io/{}'.format(str(num))
+
+    @staticmethod
+    def remove_whitespace(string):
+        '''
+        Removes multiple whitespace and unnecessary whitespace before punctuation marks.
+
+        Parameters
+        ----------
+        string:
+            A string
+
+        Returns
+        A cleaned string
+        '''
+        return ' '.join(string.split()) \
+        .replace(' ,', ',') \
+        .replace(' .', '.') \
+        .replace(' !', '!') \
+        .replace(' ?', '?') \
+        .replace(' ;', ',') \
+        .replace(' %', '%')
+
+
+
+
+
+
 
     def parse_article(self, response):
         '''
@@ -148,8 +177,11 @@ class PostsSpider(Spider):
             '/html/body/div[1]/div[2]/div[2]/div[2]/article/header/h1/span[3]/text()').get()
 
         # xpath: get first paragraph of article page
-        intro = "\n".join(response.xpath(
+        intro = ' '.join(response.xpath(
             '//*[@id="screen"]/div[2]/article/header/p/text() | //*[@id="screen"]/div[2]/article/header/p/a/text()').extract())
+        
+        #remove unnecessary whitespace
+        intro = self.remove_whitespace(intro)
 
         # xpath: get authors of article page
         authors = response.xpath(
@@ -166,8 +198,11 @@ class PostsSpider(Spider):
             '//*[@id="screen"]/div[2]/article/div[1]')
 
         # css: get all paragraphs and headlines the text wrapper contains
-        texts = "\n".join(text_wrapper.css(
+        texts =  ' '.join(text_wrapper.css(
             'p::text, p a::text, h3::text').extract())
+
+        #remove unnecessary whitespace
+        texts = self.remove_whitespace(texts)
 
         # xpath/css: get all links from the text header and the text wrapper
         links = list(set(response.xpath(
@@ -195,7 +230,7 @@ class PostsSpider(Spider):
         item['intro'] = intro
         item['text'] = texts
 
-        item['keywords'] = []
+        item['keywords'] = ['']
 
         timeformat = r"%d. %B %Y, %H:%M Uhr"
         # set locale to german for correct date parsing
