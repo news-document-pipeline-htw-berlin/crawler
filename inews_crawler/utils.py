@@ -83,6 +83,28 @@ class utils(object):
             return list_
 
 
+    @staticmethod
+    def remove_whitespace(string):
+        '''
+        Removes multiple whitespace and unnecessary whitespace before punctuation marks.
+
+        Parameters
+        ----------
+        string:
+            A string
+
+        Returns
+        A cleaned string
+        '''
+        return ' '.join(string.split()) \
+        .replace(' ,', ',') \
+        .replace(' .', '.') \
+        .replace(' :', ':') \
+        .replace(' !', '!') \
+        .replace(' ?', '?') \
+        .replace(' ;', ',') \
+        .replace(' %', '%')
+
 
     # get_items with css and xpath option + multiple expressions
     # - including logging warnings

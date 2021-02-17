@@ -129,33 +129,6 @@ class PostsSpider(Spider):
         num = pattern.search(url).group(1)
         return 'https://glm.io/{}'.format(str(num))
 
-    @staticmethod
-    def remove_whitespace(string):
-        '''
-        Removes multiple whitespace and unnecessary whitespace before punctuation marks.
-
-        Parameters
-        ----------
-        string:
-            A string
-
-        Returns
-        A cleaned string
-        '''
-        return ' '.join(string.split()) \
-        .replace(' ,', ',') \
-        .replace(' .', '.') \
-        .replace(' !', '!') \
-        .replace(' ?', '?') \
-        .replace(' ;', ',') \
-        .replace(' %', '%')
-
-
-
-
-
-
-
     def parse_article(self, response):
         '''
         Parse single article
@@ -181,7 +154,7 @@ class PostsSpider(Spider):
             '//*[@id="screen"]/div[2]/article/header/p/text() | //*[@id="screen"]/div[2]/article/header/p/a/text()').extract())
         
         #remove unnecessary whitespace
-        intro = self.remove_whitespace(intro)
+        intro = utils.remove_whitespace(intro)
 
         # xpath: get authors of article page
         authors = response.xpath(
@@ -199,10 +172,10 @@ class PostsSpider(Spider):
 
         # css: get all paragraphs and headlines the text wrapper contains
         texts =  ' '.join(text_wrapper.css(
-            'p::text, p a::text, h3::text').extract())
+            'p::text, p a::text, h3::text i::text').extract())
 
         #remove unnecessary whitespace
-        texts = self.remove_whitespace(texts)
+        texts = utils.remove_whitespace(texts)
 
         # xpath/css: get all links from the text header and the text wrapper
         links = list(set(response.xpath(
