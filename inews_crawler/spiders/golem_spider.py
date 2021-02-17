@@ -172,7 +172,7 @@ class PostsSpider(Spider):
 
         # css: get all paragraphs and headlines the text wrapper contains
         texts =  ' '.join(text_wrapper.css(
-            'p::text, p a::text, h3::text i::text').extract())
+            'p::text, p a::text, h3::text, i::text').extract())
 
         #remove unnecessary whitespace
         texts = utils.remove_whitespace(texts)
