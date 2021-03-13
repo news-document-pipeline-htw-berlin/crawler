@@ -22,22 +22,22 @@ NEWSPIDER_MODULE = 'inews_crawler.spiders'
 # WARNING: This is only a template - don't commit any changes before you take out your database password !!!
 # https://api.mongodb.com/python/current/examples/authentication.html
 
-# MONGO_DATABASE='articles'
-# MONGO_URI = 'mongodb://localhost:27017/'
+MONGO_DATABASE='articles'
+MONGO_HOST = 'localhost:27017'
 
-MONGO_USER = os.environ.get("MONGO_USER")
-MONGO_HOST = os.environ.get("MONGO_HOST")
-MONGO_DATABASE = os.environ.get("MONGO_DATABASE")
-MONGO_PWD = os.environ.get("MONGO_PWD")
-AUTH_MECHANISM = 'SCRAM-SHA-1'
+#MONGO_USER = os.environ.get("MONGO_USER")
+#MONGO_HOST = os.environ.get("MONGO_HOST")
+#MONGO_DATABASE = os.environ.get("MONGO_DATABASE")
+#MONGO_PWD = os.environ.get("MONGO_PWD")
+#AUTH_MECHANISM = 'SCRAM-SHA-1'
 
-MONGO_URI = 'mongodb://' + MONGO_USER + ':' + MONGO_PWD + '@' + MONGO_HOST \
-            + '/?authSource=' + MONGO_DATABASE + '&authMechanism=' + AUTH_MECHANISM
+#MONGO_URI = 'mongodb://' + MONGO_USER + ':' + MONGO_PWD + '@' + MONGO_HOST \
+      #      + '/?authSource=' + MONGO_DATABASE + '&authMechanism=' + AUTH_MECHANISM
 
 #only for debugging!
-#MONGO_URI = 'mongodb://' + MONGO_HOST + '/?authSource=' + MONGO_DATABASE
+MONGO_URI = 'mongodb://' + MONGO_HOST + '/?authSource=' + MONGO_DATABASE
 
-ARTICLE_COLLECTION_NAME = 'scraped_articles'
+ARTICLE_COLLECTION_NAME = 'scraped_articles_new'
 LOG_COLLECTION_NAME = 'log_crawler'
 
 #############################################################################################################

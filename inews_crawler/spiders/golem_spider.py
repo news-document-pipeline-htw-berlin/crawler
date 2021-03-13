@@ -95,7 +95,7 @@ class PostsSpider(Spider):
         request = scrapy.Request(url=url, callback=callback)
 
         # set cookies to bypass 'allow cookies' wall
-        request.cookies['iom_consent'] = '010fff0fff0fff&1603302347235'
+        #request.cookies['iom_consent'] = '010fff0fff0fff&1603302347235'
         request.cookies['golem_consent20'] = 'cmp|210127'
         request.cookies['_sp_v1_consent'] = '1!0:-1:-1:-1'
         request.cookies['euconsent-v2'] = 'CPAzFgePAzFgeAGABCENBLCgAP_AAAAAAAYgHQhd5DrNTWFAUXxZStFgGYgUxsQUAmQCCACBAyAFAAGQ8IQCk0ACsASABAAAAQAAoxABAAAEHAEEAAAAAAAEAAAAAAQAgAAIIAAEABEBAAIQAAoIAAAAAAAAAAABCAAAmACQA8bCBGAAAIAwQAAAgAAACIAAAgAAAQGQBwAVABMAC5APsA_ACOAJiAXmMABgFiANkAk4RAGABUAFwAfgCGwEXgJ2CQKQAEAALAAqABkADgAIAARAAqABoADyAIgAigBMACeAFwAN4AcwBCQCIAIkASwApQBbgDDAGqAPaAfYB-gEaAI4ASkAuYBfgDFAG4APQAhsBF4CYgE7AKHAXmAwYBpwQAMAB8AXwBAwErAMhAcEGgDgAqAC4APwBDYCLwE7AMYDAAQDZCoA4AKgAmABcAH4ARwBMQC8x0DMABYAFQAMgAcABAACIAFQANAAeAA-gCIAIoATAAngBcADEAG8AOYAhIBEAESAJYATAApQBYgC3AGGAMoAaIA9oB9gH6ARYAjgBKQCxAFzALqAXkAvwBigDcAHoAQ2Ai8BOwChwF5gMGAYkAxgBlgDTgHFjgCIACAALgAfAC6AGQAXwBAwCEAERAIyAXoA8gCEAErAJiAZCA00hATAAWABkAEQAKgAmABcADEAG8AWIAyoB9gH4ARwAlIBcwC_AGKAPQAtoBiRAAOAAgAXwBGQCxAGyAScAmIlAYAAQAAsADIAHAARAA8ACIAEwALgAYgBCQCIAIkAUoAtwBlADVAH4ARwAuoBigDcAIvAXmAywkAFAAuAGQAXwBGQErFIEoACwAKgAZAA4ACAAEQAKgAaAA8gCIAIoATAAngBSAC4AGIAOYAhIBEAESAKUAWIAtwBlADRAGrAPsA_QCLAEcAJSAXMAvIBuAD0AIvATsAocBeYDGCgAsAC4AHwAyAC-ALEAXUAxQB5AExANNAcEAAA.YAAAAAAAAAAA'
@@ -105,6 +105,11 @@ class PostsSpider(Spider):
         request.cookies['golem_testcookie'] = '1'
         request.cookies['golem_viewauto'] = 'desktop%3Afirefox_85_0'
         request.cookies['golem_c20date'] = '1611951926'
+        request.cookies['_sp_v1_data'] = '2:274572:1611951924:0:24:0:24:0:0:_:-1'
+        request.cookies['_sp_v1_lt'] = '1:'
+        request.cookies['_sp_v1_ss'] = '1:H4sIAAAAAAAAAItWqo5RKimOUbKKBjLyQAyD2lidGKVUEDOvNCcHyC4BK6iurVWKBQAW54XRMAAAAA%3D%3D'
+        request.cookies['_sp_v1_uid'] = '1:940:7870ef02-efc6-487f-b050-6a7b4fe6e351'
+
 
         # set newest chrome user agent
         # https://www.whatismybrowser.com/guides/the-latest-user-agent/chrome
@@ -207,7 +212,7 @@ class PostsSpider(Spider):
 
         timeformat = r"%d. %B %Y, %H:%M Uhr"
         # set locale to german for correct date parsing
-        locale.setlocale(locale.LC_TIME, 'de_DE.utf8')
+        locale.setlocale(locale.LC_ALL, 'de_DE.utf8')
         item['published_time'] = datetime.strptime(published_time, timeformat)
 
         item['image_links'] = images
